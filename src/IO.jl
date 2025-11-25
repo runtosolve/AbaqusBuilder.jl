@@ -81,11 +81,17 @@ function get_sta(filename, file_path)
 
 
     data = DelimitedFiles.readdlm(joinpath(file_path, filename))
-    data = data[6:end, 1:end-3]
+    data = data[6:end-1, 1:end-3]
 
     index = findall(inc -> typeof(inc)==SubString{String}, data[:, 3]) #remove U rows 
 
     keep_index = setdiff(1:size(data)[1], index)
+
+   #always add last step 
+    if keep_index[end] != size(data)[1]
+        keep_index = [keep_index; size(data)[1]]
+        data[size(data)[1], 3] = parse(Int, data[size(data)[1], 3][1:end-1])
+    end
 
     data = data[keep_index, :]
 
