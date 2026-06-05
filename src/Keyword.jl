@@ -1408,6 +1408,161 @@ function SOLID_SECTION(elset_name, material_name)
 end
 
 
+
+
+# dims tuple contents by section type (*Beam Section keyword).
+# Sources: https://abaqus.uclouvain.be/English/SIMACAEELMRefMap/simaelm-c-beamcrosssectlib.htm
+#          CHANNEL and HAT confirmed valid via Abaqus CAE inp export
+#
+#   BOX       => (a, b, t1, t2, t3, t4)              width, height, 4 wall thicknesses
+#   PIPE      => (r, t)                               outside radius, wall thickness
+#   CIRC      => (r,)                                 radius (solid circle)
+#   RECT      => (a, b)                               width, height (solid rectangle)
+#   HEX       => (d, t)                               circumscribing radius, wall thickness
+#   TRAPEZOID => (a, b, c, d)                         bottom width, height, top width, top offset
+#   I         => (l, h, b1, b2, t1, t2, t3)          dist centroid-bottom, height,
+#                                                     bot flange width, top flange width,
+#                                                     bot flange t, top flange t, web t
+#   T         => (b, h, l, tf, tw)                  flange width, total height,
+#                                                     dist centroid-bottom, flange t, web t
+#                NOTE: emits section=I with b1=t1=0; Abaqus has no section=T keyword
+#   L         => (a, b, t1, t2)                       leg lengths, leg thicknesses
+#   CHANNEL   => (l, h, b1, b2, t1, t2, t3, o)      dist centroid-bottom, height,
+#                                                     bot flange width, top flange width,
+#                                                     bot flange t, top flange t, web t, offset
+#                NOTE: emits *Beam General Section; cannot use during-analysis integration
+#   HAT       => (l, h, b, b1, b2, t1, t2, t3)       dist centroid-bottom, height,
+#                                                     total bottom width, top width,
+#                                                     bot flange overhang width,
+#                                                     top t, bot flange t, inclined wall t
+#                NOTE: emits *Beam General Section; cannot use during-analysis integration
+
+function BEAM_SECTION(elset_name, material_name, section_type, dims, n1, n2, n3;
+                      temperature=nothing, E=nothing, G=nothing, poisson=nothing)
+
+    s = uppercase(section_type)
+
+    line1 = "*Beam Section, elset=" * elset_name * ", material=" * material_name * ", section=" * s
+    if temperature !== nothing
+        line1 *= ", temperature=" * uppercase(temperature)
+    end
+
+    if s == "BOX"
+        # (a, b, t1, t2, t3, t4)
+        line2 = @sprintf "%g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6]
+    elseif s == "PIPE"
+        # (r, t)
+        line2 = @sprintf "%g, %g" dims[1] dims[2]
+    elseif s == "CIRC"
+        # (r,)
+        line2 = @sprintf "%g" dims[1]
+    elseif s == "RECT"
+        # (a, b)
+        line2 = @sprintf "%g, %g" dims[1] dims[2]
+    elseif s == "HEX"
+        # (d, t)
+        line2 = @sprintf "%g, %g" dims[1] dims[2]
+    elseif s == "TRAPEZOID"
+        # (a, b, c, d)
+        line2 = @sprintf "%g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4]
+    elseif s == "I"
+        # (l, h, b1, b2, t1, t2, t3)
+        line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7]
+    elseif s == "T"
+        # T has no Abaqus section=T keyword — written as I with bottom flange zeroed (b1=0, t1=0)
+        # dims = (b, h, l, tf, tw): flange width, total height, dist centroid-bottom, flange t, web t
+        b_f, h_t, l_t, tf_t, tw_t = dims
+        line1 = "*Beam Section, elset=" * elset_name * ", material=" * material_name * ", section=I"
+        line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g" l_t h_t 0.0 b_f 0.0 tf_t tw_t
+    elseif s == "L"
+        # (a, b, t1, t2)
+        line2 = @sprintf "%g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4]
+    elseif s == "CHANNEL" || s == "HAT"
+        # *Beam General Section required — cannot use during-analysis integration
+        # Material defined inline: poisson= on keyword line, E and G on 4th data line
+        if any(isnothing, (E, G, poisson))
+            error("BEAM_SECTION: $section_type requires keyword args E, G, and poisson")
+        end
+        line1 = @sprintf "*Beam General Section, elset=%s, poisson=%g, section=%s" elset_name poisson s
+        if s == "CHANNEL"
+            # (l, h, b1, b2, t1, t2, t3, o)
+            line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7] dims[8]
+        else
+            # HAT: (l, h, b, b1, b2, t1, t2, t3)
+            line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g, %g" dims[1] dims[2] dims[3] dims[4] dims[5] dims[6] dims[7] dims[8]
+        end
+        line3 = @sprintf "%g, %g, %g" n1 n2 n3
+        line4 = @sprintf "%g, %g" E G
+        return [line1; line2; line3; line4]
+    else
+        error("BEAM_SECTION: unsupported section type \"$section_type\"")
+    end
+
+    line3 = @sprintf "%g, %g, %g" n1 n2 n3
+
+    return [line1; line2; line3]
+
+end
+
+
+# BEAM_GENERAL_SECTION — for Generalized (and thick-walled Pipe) profiles.
+# Corresponds to *Beam General Section, section=GENERAL in the inp file.
+# GammaO and GammaW are sectorial moment and warping constant (open sections only;
+# leave as 0.0 for closed or solid sections and they will be omitted).
+#
+# dims = (A, I11, I12, I22, J)
+#   A   = cross-sectional area
+#   I11 = moment of inertia about local 1-axis
+#   I12 = product of inertia
+#   I22 = moment of inertia about local 2-axis
+#   J   = torsional constant
+
+# BEAM_ARBITRARY_SECTION — open thin-walled section defined by node coordinates and thicknesses.
+# Corresponds to *Beam Section, section=ARBITRARY.
+#
+# nodes        : (n_legs+1) × 2 matrix of (x1, x2) coords in the local cross-section plane
+# thicknesses  : vector of n_legs wall thicknesses, one per segment
+
+function BEAM_ARBITRARY_SECTION(elset_name, material_name, nodes, thicknesses, n1, n2, n3)
+
+    n_seg = length(thicknesses)
+    @assert size(nodes, 1) == n_seg + 1 "BEAM_ARBITRARY_SECTION: need n_seg+1=$(n_seg+1) nodes, got $(size(nodes,1))"
+
+    line1 = "*Beam Section, elset=" * elset_name * ", material=" * material_name * ", section=ARBITRARY"
+
+    # First data line: n_seg, x1_A, x2_A, x1_B, x2_B, t_AB — all on one line
+    first_line = @sprintf "%d, %g, %g, %g, %g, %g" n_seg nodes[1,1] nodes[1,2] nodes[2,1] nodes[2,2] thicknesses[1]
+    # Subsequent segments: x1_new, x2_new, t (3 values each)
+    rest_lines  = [@sprintf "%g, %g, %g" nodes[i+1,1] nodes[i+1,2] thicknesses[i] for i in 2:n_seg]
+    line_orient = @sprintf "%g, %g, %g" n1 n2 n3
+
+    return [line1; first_line; rest_lines; line_orient]
+
+end
+
+
+function BEAM_GENERAL_SECTION(elset_name, dims, n1, n2, n3; GammaO=0.0, GammaW=0.0)
+
+    A, I11, I12, I22, J = dims
+
+    line1 = "*Beam General Section, elset=" * elset_name * ", section=GENERAL"
+
+    if GammaO == 0.0 && GammaW == 0.0
+        line2 = @sprintf "%g, %g, %g, %g, %g" A I11 I12 I22 J
+    else
+        line2 = @sprintf "%g, %g, %g, %g, %g, %g, %g" A I11 I12 I22 J GammaO GammaW
+    end
+
+    line3 = @sprintf "%g, %g, %g" n1 n2 n3
+
+    return [line1; line2; line3]
+
+end
+
+
+
+
+
 function SPRING(elset, dof, stiffness)
 
     lines = @sprintf "*Spring, elset=%s" elset
