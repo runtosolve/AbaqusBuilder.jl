@@ -1,7 +1,7 @@
 name = "ABAQUS"
 uuid = "3de819fd-b07e-4939-9fde-f678daf6906b"
-authors = ["Cris Moen <cris.moen@runtosolve.com>"]
 version = "0.1.0"
+authors = ["Cris Moen <cris.moen@runtosolve.com>"]
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -13,3 +13,4 @@ ReadWriteFind = "6e1ff3fe-52ba-4718-9baa-43b124cc059a"
 [compat]
 DataFrames = "1.7.0"
 DelimitedFiles = "1.9.1"
+ReadWriteFind = "0.1.0"

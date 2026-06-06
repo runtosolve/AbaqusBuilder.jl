@@ -2,6 +2,24 @@ module Mesh
 
 using ReadWriteFind
 
+export get_nodes_from_file, get_elements_from_file
+
+"""
+    get_nodes_from_file(mesh_filename, start_target, end_target)
+
+Read node coordinates from an Abaqus mesh file between two marker strings.
+
+Searches `mesh_filename` for lines matching `start_target` and `end_target`,
+then parses every line in between as a node record.
+
+# Arguments
+- `mesh_filename`: Path to the mesh text file
+- `start_target`: String marking the line immediately before the node block
+- `end_target`: String marking the line immediately after the node block
+
+# Returns
+A matrix of type `Union{Float64, Int64}` with columns `[node_number, x, y, z]`.
+"""
 function get_nodes_from_file(mesh_filename, start_target, end_target)
 
     lines = ReadWriteFind.read_text_file(mesh_filename)
@@ -18,7 +36,7 @@ function get_nodes_from_file(mesh_filename, start_target, end_target)
     node_numbers = Vector{Int64}(undef, size(node_lines)[1])
 
     for i in eachindex(node_lines)
-            
+
         io = split(node_lines[i][1:end], " ")
         io = filter(x->x != "", io)
         node_number = parse(Int, io[1][1:end-1])
@@ -38,6 +56,20 @@ function get_nodes_from_file(mesh_filename, start_target, end_target)
 end
 
 
+"""
+    get_elements_from_file(mesh_filename, start_target, end_target, nodes_per_element)
+
+Read element connectivity from an Abaqus mesh file between two marker strings.
+
+# Arguments
+- `mesh_filename`: Path to the mesh text file
+- `start_target`: String marking the line immediately before the element block
+- `end_target`: String marking the line immediately after the element block
+- `nodes_per_element`: Number of nodes per element (e.g. 2 for beams, 4 for quads)
+
+# Returns
+An `Int64` matrix with `nodes_per_element + 1` columns: `[element_number, node1, node2, ...]`.
+"""
 function get_elements_from_file(mesh_filename, start_target, end_target, nodes_per_element)
 
     lines = ReadWriteFind.read_text_file(mesh_filename)
@@ -53,7 +85,7 @@ function get_elements_from_file(mesh_filename, start_target, end_target, nodes_p
     elements = Matrix{Int64}(undef, (size(lines)[1], nodes_per_element + 1))
 
     for i in eachindex(lines)
-            
+
         io = split(lines[i][1:end], " ")
         io = filter(x->x != "", io)
 
