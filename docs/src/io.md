@@ -3,5 +3,5 @@
 Functions for parsing Abaqus output files (`.sta`, `.dat`, nodal output).
 
 ```@autodocs
-Modules = [ABAQUS.IO]
+Modules = [ABAQUSBuilder.IO]
 ```
