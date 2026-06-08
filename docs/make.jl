@@ -1,13 +1,13 @@
 using Documenter
-using ABAQUS
-using ABAQUS.Keyword
-using ABAQUS.Mesh
-using ABAQUS.IO
-using ABAQUS.Scripts
+using ABAQUSBuilder
+using ABAQUSBuilder.Keyword
+using ABAQUSBuilder.Mesh
+using ABAQUSBuilder.IO
+using ABAQUSBuilder.Scripts
 
 makedocs(
-    sitename = "ABAQUS.jl",
-    modules  = [ABAQUS, ABAQUS.Keyword, ABAQUS.Mesh, ABAQUS.IO, ABAQUS.Scripts],
+    sitename = "ABAQUSBuilder.jl",
+    modules  = [ABAQUSBuilder, ABAQUSBuilder.Keyword, ABAQUSBuilder.Mesh, ABAQUSBuilder.IO, ABAQUSBuilder.Scripts],
     format   = Documenter.HTML(prettyurls = false),
     pages    = [
         "Home"      => "index.md",

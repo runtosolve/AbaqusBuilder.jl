@@ -3,5 +3,5 @@
 Functions for generating Abaqus CAE Python scripts and macros.
 
 ```@autodocs
-Modules = [ABAQUS.Scripts]
+Modules = [ABAQUSBuilder.Scripts]
 ```
