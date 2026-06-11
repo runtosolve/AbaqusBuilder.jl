@@ -2,10 +2,10 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "3115e11d1a3676c7ddd5389343592b3c597bb908"
+project_hash = "570e19f7649c05e410895a9d7ea7945dc29d23de"
 
 [[deps.ABAQUS]]
-deps = ["DataFrames", "DelimitedFiles", "Formatting", "Printf", "ReadWriteFind"]
+deps = ["DataFrames", "DelimitedFiles", "Printf", "ReadWriteFind"]
 path = "."
 uuid = "3de819fd-b07e-4939-9fde-f678daf6906b"
 version = "0.1.0"
@@ -71,12 +71,6 @@ git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 version = "1.9.1"
 
-[[deps.Formatting]]
-deps = ["Logging", "Printf"]
-git-tree-sha1 = "fb409abab2caf118986fc597ba84b50cbaf00b87"
-uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
-version = "0.4.3"
-
 [[deps.Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
@@ -128,10 +122,6 @@ version = "1.11.0"
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 version = "1.12.0"
-
-[[deps.Logging]]
-uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
-version = "1.11.0"
 
 [[deps.Markdown]]
 deps = ["Base64", "JuliaSyntaxHighlighting", "StyledStrings"]
