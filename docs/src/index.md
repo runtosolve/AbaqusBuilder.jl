@@ -1,7 +1,7 @@
-# ABAQUSBuilder.jl
+# AbaqusBuilder.jl
 
 ```@docs
-ABAQUSBuilder
+AbaqusBuilder
 ```
 
 Julia package for programmatically generating Abaqus finite-element input files
@@ -10,7 +10,7 @@ and post-processing Abaqus output.
 ## Installation
 
 ```julia
-] add https://github.com/runtosolve/ABAQUSBuilder.jl
+] add https://github.com/runtosolve/AbaqusBuilder.jl
 ```
 
 ## Overview
@@ -25,7 +25,7 @@ and post-processing Abaqus output.
 ## Quick Example
 
 ```julia
-using ABAQUSBuilder
+using AbaqusBuilder
 
 lines = []
 

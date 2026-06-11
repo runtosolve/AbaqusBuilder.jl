@@ -1,5 +1,5 @@
 """
-    ABAQUSBuilder
+    AbaqusBuilder
 
 Julia package for programmatically generating Abaqus finite-element input files
 and post-processing results.
@@ -10,7 +10,7 @@ and post-processing results.
 - `IO` — parse Abaqus output files (`.sta`, `.dat`, nodal output)
 - `Scripts` — generate Abaqus CAE Python scripts and macros
 """
-module ABAQUSBuilder
+module AbaqusBuilder
 
 include("Keyword.jl")
 using .Keyword
@@ -24,7 +24,7 @@ using .IO
 include("Scripts.jl")
 using .Scripts
 
-# Re-export all public symbols so users can call ABAQUSBuilder.BOUNDARY etc.
+# Re-export all public symbols so users can call AbaqusBuilder.BOUNDARY etc.
 # and Documenter.jl can collect everything under one module.
 using .Keyword: AMPLITUDE, BOUNDARY, BUCKLE, CLOAD, CONN3D2,
     CONNECTOR_BEHAVIOR, CONNECTOR_ELASTICITY, CONNECTOR_FRICTION,
@@ -75,4 +75,4 @@ using .Scripts: generate_shell_mesh_from_stp_file, grab_connector_forces_from_od
 export generate_shell_mesh_from_stp_file, grab_connector_forces_from_odb,
     write_mesh_bash_script, write_ding_connector_uel_f_file, write_update_inp_macro
 
-end # module ABAQUSBuilderBuilder
+end # module AbaqusBuilder

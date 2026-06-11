@@ -1,4 +1,4 @@
-name = "ABAQUSBuilder"
+name = "AbaqusBuilder"
 uuid = "3de819fd-b07e-4939-9fde-f678daf6906b"
 version = "0.1.1"
 authors = ["Cris Moen <cris.moen@runtosolve.com>"]
