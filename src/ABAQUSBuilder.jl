@@ -75,4 +75,4 @@ using .Scripts: generate_shell_mesh_from_stp_file, grab_connector_forces_from_od
 export generate_shell_mesh_from_stp_file, grab_connector_forces_from_odb,
     write_mesh_bash_script, write_ding_connector_uel_f_file, write_update_inp_macro
 
-end # module ABAQUSBuilderBuilder
+end # module ABAQUSBuilder
