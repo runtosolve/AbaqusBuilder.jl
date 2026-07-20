@@ -1373,7 +1373,9 @@ A vector of strings forming the full instance block including `*End Instance`.
 function INSTANCE(instance_name, part_name, offset_coordinates)
 
     lines = @sprintf "*Instance, name=%s, part=%s" instance_name part_name
-    lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f" offset_coordinates[1] offset_coordinates[2] offset_coordinates[3]]
+    # Write the offset at full Float64 precision. The previous "%7.4f" rounded to 4 decimals,
+    # which shifts instance placement by up to 5e-5 and corrupts tight sidelap/overlap spacing.
+    lines = [lines; "$(offset_coordinates[1]), $(offset_coordinates[2]), $(offset_coordinates[3])"]
     lines = [lines; "*End Instance"]
 
     return lines
@@ -1384,8 +1386,9 @@ end
 function INSTANCE(instance_name, part_name, offset_coordinates, point_a_coordinates, point_b_coordinates, rotation_angle_a_b)
 
     lines = @sprintf "*Instance, name=%s, part=%s" instance_name part_name
-    lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f" offset_coordinates[1] offset_coordinates[2] offset_coordinates[3]]
-    lines = [lines; @sprintf "%7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f" point_a_coordinates[1] point_a_coordinates[2] point_a_coordinates[3] point_b_coordinates[1] point_b_coordinates[2] point_b_coordinates[3] rotation_angle_a_b]
+    # Full Float64 precision (see the translation-only method above for the rationale).
+    lines = [lines; "$(offset_coordinates[1]), $(offset_coordinates[2]), $(offset_coordinates[3])"]
+    lines = [lines; "$(point_a_coordinates[1]), $(point_a_coordinates[2]), $(point_a_coordinates[3]), $(point_b_coordinates[1]), $(point_b_coordinates[2]), $(point_b_coordinates[3]), $(rotation_angle_a_b)"]
     lines = [lines; "*End Instance"]
 
     return lines
